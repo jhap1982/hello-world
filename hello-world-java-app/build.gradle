@@ -37,7 +37,7 @@ def getSvnRevision() {
     return rev;
 }
 
-mainClassName = 'com.template.MainTemplate'
+mainClassName = 'com.jhap1982.helloworld.MainApp'
 
 ext.remote = project.hasProperty('remote') ? project.getProperty('remote').toBoolean() : true
 ext.isRelease = project.hasProperty('isRelease') ? project.getProperty('isRelease').toBoolean() : false
@@ -50,14 +50,12 @@ if (!isRelease) {
 	version = version  + "-SNAPSHOT"
 }
 
-println "Project:\t\t\t${group}:$archivesBaseName:$version"
+println "Project:\t\t\t$group:$archivesBaseName:$version"
 println "Revision:\t\t\t$revision"
 println "Description:\t\t\t$description"
-println "Main Class:\t\t\t$mainClassName"
 println "Java level compilation version:\t$javaVersion"
 println "Gradle version:\t\t\t$gradle.gradleVersion"
-println "JUnit version:\t\t\t$junitVersion"
-println "JaCoCo Tool version:\t\t$jacoco.toolVersion"
+println "Java Version installed:\t\t$currentJavaVersion"
 
 tasks.withType(JavaCompile) {
     options.encoding = encoding
@@ -69,6 +67,15 @@ targetCompatibility = javaVersion
 repositories {
 	// Maven central //
     mavenCentral()
+    
+    // Gradle //
+	maven { 
+		url "http://repo.gradle.org/gradle/libs-releases-local/"
+		content { 
+			// This repository *only* contains artifacts with group "org.gradle"
+			includeGroup "org.gradle"
+		}
+	}
 }
 
  task copyToLib( type: Copy ) {
@@ -106,20 +113,34 @@ sourceSets {
 }
 
 dependencies {
-	// Basic test dependencies //
 	testCompile "org.gradle:gradle-tooling-api:$gradle.gradleVersion"
-	testCompile "junit:junit:${junitVersion}"
-    testCompile "org.mockito:mockito-all:${mockitoAllVersion}"
-    testCompile "org.hamcrest:hamcrest-library:${hamcrestLibraryVerson}"
     
-    // Logger implementation test dependencies //
-    testCompile "org.apache.logging.log4j:log4j-slf4j-impl:${log4j2ImplVersion}"
-	testCompile "org.apache.logging.log4j:log4j-api:${log4j2ImplVersion}"
-	testCompile "org.apache.logging.log4j:log4j-core:${log4j2ImplVersion}"
+	testCompile "org.junit.jupiter:junit-jupiter-engine:$junitJupiterEngine"
+	testCompile "org.junit.vintage:junit-vintage-engine:$junitVintageEngineVersion"
+	testCompile "org.junit.platform:junit-platform-runner:$junitPlatformRunner"
+	
+	testCompile "org.mockito:mockito-core:$mockitoCoreVersion"
+	testCompile "org.mockito:mockito-junit-jupiter:$mockitoCoreVersion"
+	
+	testCompile "org.hamcrest:hamcrest-library:$hamcrestLibraryVerson"
+	
+    // Binding for Log4j 2
+	testCompile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2ImplVersion"
+	
+	// Log4j 2 API and Core implementation required for binding
+	testCompile "org.apache.logging.log4j:log4j-api:$log4j2ImplVersion"
+	testCompile "org.apache.logging.log4j:log4j-core:$log4j2ImplVersion"
+}
+
+test {
+	// https://junit.org/junit5/docs/current/user-guide/#running-tests-build-gradle
+    useJUnitPlatform()
+    
+    testLogging.showStandardStreams = showLog
 }
 
 task integTest(type: Test) {
- 	useJUnit()
+ 	useJUnitPlatform()
 	
 	testClassesDirs = sourceSets.integTest.output.classesDirs
     classpath = sourceSets.integTest.runtimeClasspath
