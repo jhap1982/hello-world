@@ -1,0 +1,154 @@
+/*
+  This is a hello world java application (executable) project.
+*/
+import org.tmatesoft.svn.core.wc.*
+
+apply plugin: 'application'
+apply plugin: 'java'
+
+apply plugin: 'maven-publish'
+apply plugin: 'maven'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'jacoco'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.tmatesoft.svnkit:svnkit:$svnKitVersion"
+    }
+}	
+
+def getSvnRevision() {
+	def rev = "";
+	
+	try {
+	    ISVNOptions options = SVNWCUtil.createDefaultOptions(true);
+	    SVNClientManager clientManager = SVNClientManager.newInstance(options);
+	    SVNStatusClient statusClient = clientManager.getStatusClient();
+	    SVNStatus status = statusClient.doStatus(projectDir, false);
+	    SVNRevision revision = status.getRevision();
+    	rev = revision.getNumber();
+    } catch (Exception e) {
+    	rev = "";
+    }
+    
+    return rev;
+}
+
+mainClassName = 'com.template.MainTemplate'
+
+ext.remote = project.hasProperty('remote') ? project.getProperty('remote').toBoolean() : true
+ext.isRelease = project.hasProperty('isRelease') ? project.getProperty('isRelease').toBoolean() : false
+ext.currentJavaVersion = JavaVersion.current();
+ext.qualifier = isRelease ? "" : "-SNAPSHOT"
+ext.revision = getSvnRevision()
+ext.descriptionMetaInf = description
+
+if (!isRelease) {
+	version = version  + "-SNAPSHOT"
+}
+
+println "Project:\t\t\t${group}:$archivesBaseName:$version"
+println "Revision:\t\t\t$revision"
+println "Description:\t\t\t$description"
+println "Main Class:\t\t\t$mainClassName"
+println "Java level compilation version:\t$javaVersion"
+println "Gradle version:\t\t\t$gradle.gradleVersion"
+println "JUnit version:\t\t\t$junitVersion"
+println "JaCoCo Tool version:\t\t$jacoco.toolVersion"
+
+tasks.withType(JavaCompile) {
+    options.encoding = encoding
+}
+
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion
+
+repositories {
+	// Maven central //
+    mavenCentral()
+}
+
+ task copyToLib( type: Copy ) {
+    into "$buildDir/libs/lib"
+    from configurations.runtime
+}
+
+jar {
+    archiveName = archivesBaseName + '.jar'
+
+	from {
+    	configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+  	}
+ 
+    manifest {
+        attributes 'Manifest-Version': '1.0',
+                   'Implementation-Title': "${descriptionMetaInf}",
+                   'Implementation-Version': version,
+                   'Implementation-Vendor': '',
+                   'Main-Class': mainClassName
+    }
+    
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+}
+
+sourceSets {
+    integTest {
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+        runtimeClasspath += configurations.jacocoAnt
+        
+        java { srcDirs = ['src/it/java'] }
+        resources { srcDirs = ['src/it/resources'] }
+    }
+}
+
+dependencies {
+	// Basic test dependencies //
+	testCompile "org.gradle:gradle-tooling-api:$gradle.gradleVersion"
+	testCompile "junit:junit:${junitVersion}"
+    testCompile "org.mockito:mockito-all:${mockitoAllVersion}"
+    testCompile "org.hamcrest:hamcrest-library:${hamcrestLibraryVerson}"
+    
+    // Logger implementation test dependencies //
+    testCompile "org.apache.logging.log4j:log4j-slf4j-impl:${log4j2ImplVersion}"
+	testCompile "org.apache.logging.log4j:log4j-api:${log4j2ImplVersion}"
+	testCompile "org.apache.logging.log4j:log4j-core:${log4j2ImplVersion}"
+}
+
+task integTest(type: Test) {
+ 	useJUnit()
+	
+	testClassesDirs = sourceSets.integTest.output.classesDirs
+    classpath = sourceSets.integTest.runtimeClasspath
+	testLogging.showStandardStreams = showLog
+
+    reports.html.destination = file("${reporting.baseDir}/integTests")
+    reports.junitXml.destination = file("$buildDir/integTest-results")
+    
+    options {
+    	systemProperty "file.encoding", encoding
+    }
+}
+
+eclipse {
+	project.name = archivesBaseName
+    
+	wtp {
+        facet {
+            facet name: 'jst.java', version: javaVersion
+        }
+    }
+    
+    jdt {
+		javaRuntimeName = "JavaSE-" + javaVersion
+	}
+	
+    eclipseJdt.doLast() {
+        File f = file('.settings/org.eclipse.core.resources.prefs')
+        f.write('eclipse.preferences.version=1\n')
+        f.append("encoding/<project>=$encoding")
+    }
+}
