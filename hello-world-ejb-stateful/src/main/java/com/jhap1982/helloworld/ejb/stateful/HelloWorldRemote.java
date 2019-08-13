@@ -3,15 +3,13 @@ package com.jhap1982.helloworld.ejb.stateful;
 import javax.ejb.Remote;
 
 /**
- * Remote interface of Template EJB.
+ * Remote interface of Hello World EJB.
  * 
  * @author jhap1982
  */
 @Remote
 public interface HelloWorldRemote {
 
-	public void increment();
-	
-	public int getCounter();
+	public String helloWorld(String input);
 	
 }
