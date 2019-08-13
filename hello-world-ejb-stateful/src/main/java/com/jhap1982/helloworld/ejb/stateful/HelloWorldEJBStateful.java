@@ -10,16 +10,10 @@ import javax.ejb.Stateful;
 @Stateful
 public class HelloWorldEJBStateful implements HelloWorldLocal, HelloWorldRemote {
 
-	private int counter;
-	
 	@Override
-	public void increment() {
-		counter++;
+	public String helloWorld(String input) {
+		return input;
 	}
 	
-	@Override
-	public int getCounter() {
-		return counter;
-	}
 
 }
