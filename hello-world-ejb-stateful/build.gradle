@@ -1,0 +1,188 @@
+/*
+  Stateful enterprise java bean (ejb) project: you must change values from
+  gradle.properties and may add project dependencies on this file.
+*/
+import org.tmatesoft.svn.core.wc.*
+
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'maven'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'jacoco'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.tmatesoft.svnkit:svnkit:${svnkitVersion}"
+    }
+}	
+
+jacoco {
+    toolVersion = "${jaCoCoVersion}"
+}
+
+def getSvnRevision() {
+	def rev = "";
+	
+	try {
+	    ISVNOptions options = SVNWCUtil.createDefaultOptions(true);
+	    SVNClientManager clientManager = SVNClientManager.newInstance(options);
+	    SVNStatusClient statusClient = clientManager.getStatusClient();
+	    SVNStatus status = statusClient.doStatus(projectDir, false);
+	    SVNRevision revision = status.getRevision();
+    	rev = revision.getNumber();
+    } catch (Exception e) {
+    	rev = "";
+    }
+    
+    return rev;
+}
+
+def getVersion(projectName) {
+	def props = new Properties()
+	
+	ext.versionFile.withInputStream { props.load(it) }
+	
+	def majorKey = projectName + ".major";
+	def minorKey = projectName + ".minor"
+	def patchKey = projectName + ".patch";
+	
+	def major = getProperty("${majorKey}");
+	def minor = getProperty("${minorKey}");
+	def patch = props.getProperty("${patchKey}");
+	
+	return  "${major}.${minor}.${patch}"
+}
+
+ext.versionFile = file('adaptor.version.properties');
+ext.transitive = project.hasProperty('transitive') ? project.getProperty('transitive').toBoolean() : false
+ext.exclude = project.hasProperty('exclude') ? project.getProperty('exclude').toBoolean() : false
+ext.remote = project.hasProperty('remote') ? project.getProperty('remote').toBoolean() : true
+ext.isRelease = project.hasProperty('isRelease') ? project.getProperty('isRelease').toBoolean() : false // By default is snapshot
+ext.currentJavaVersion = JavaVersion.current();
+ext.qualifier = isRelease ? "" : "-SNAPSHOT"
+ext.revision = getSvnRevision()
+ext.descriptionMetaInf = description
+
+if (!isRelease) {
+	version = version  + "-SNAPSHOT"
+}
+
+println "Project:\t\t\t${group}:${archivesBaseName}:${version}"
+println "Revision:\t\t\t${revision}"
+println "Description:\t\t\t${description}"
+println "Java level compilation version:\t${javaVersion}"
+println "Gradle version:\t\t\t${gradle.gradleVersion}"
+println "JUnit version:\t\t\t${junitVersion}"
+println "Java EE for testing:\t\t${javaeeApiTest}"
+println "JaCoCo Tool version:\t\t${jacoco.toolVersion}"
+println "Java Version installed:\t\t${currentJavaVersion}"
+
+tasks.withType(JavaCompile) {
+    options.encoding = encoding
+}
+
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion
+
+repositories {
+  	// Gradle //
+	maven { url 'http://repo.gradle.org/gradle/libs-releases-local/' }
+	
+	// Maven central //
+    mavenCentral()
+}
+
+jar {
+    archiveName = archivesBaseName + '.' + fileExtension
+
+    manifest {
+        attributes 'Manifest-Version: 1.0',
+                   'Implementation-Title': "${descriptionMetaInf}",
+                   'Implementation-Version': "$version (r${revision})",
+                   'Implementation-Vendor': ''
+    }
+}
+
+sourceSets {
+    integTest {
+ 		compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+        runtimeClasspath += configurations.jacocoAnt  
+        
+        java { srcDirs = ['src/it/java'] }
+        resources { srcDirs = ['src/it/resources'] }
+    }
+}
+
+configurations {
+    integTestCompile.extendsFrom testCompile
+    integTestRuntime.extendsFrom testRuntime
+    
+    all {
+    	// https://docs.gradle.org/current/dsl/org.gradle.api.artifacts.ResolutionStrategy.html
+    	resolutionStrategy {
+    		// Check for updates every build
+		    cacheChangingModulesFor 0, 'seconds'
+    		cacheDynamicVersionsFor 0, 'seconds'
+		}
+    }
+}
+
+dependencies {
+	// Provided Java EE dependency
+    compileOnly javaeeApi
+
+	// Java EE test dependencies
+	testCompile javaeeApiTest
+    
+	// Basic test dependencies //
+	testCompile "org.gradle:gradle-tooling-api:$gradle.gradleVersion"
+	testCompile "junit:junit:${junitVersion}"
+    testCompile "org.mockito:mockito-core:${mockitoCoreVersion}"
+    testCompile "org.hamcrest:hamcrest-library:${hamcrestLibraryVerson}"
+    
+    // Logger implementation test dependencies //
+    testCompile "org.apache.logging.log4j:log4j-slf4j-impl:${log4j2ImplVersion}"
+	testCompile "org.apache.logging.log4j:log4j-api:${log4j2ImplVersion}"
+	testCompile "org.apache.logging.log4j:log4j-core:${log4j2ImplVersion}"
+}
+
+task integTest(type: Test) {
+ 	useJUnit()
+	
+    testClassesDirs = sourceSets.integTest.output.classesDirs
+    classpath = sourceSets.integTest.runtimeClasspath
+	testLogging.showStandardStreams = showLog
+
+    reports.html.destination = file("${reporting.baseDir}/integTests")
+    reports.junitXml.destination = file("$buildDir/integTest-results")
+    
+    options {
+    	systemProperty "file.encoding", encoding
+    }
+}
+
+eclipse {
+	project.name = archivesBaseName 
+	
+    wtp {
+        facet {
+            facets = []
+            facet name: 'jst.java', version: javaVersion
+            facet name: 'jst.ejb', version: ejbVersion
+        }
+    }
+
+	jdt {
+		javaRuntimeName = "JavaSE-" + javaVersion
+	}
+
+    eclipseJdt.doLast() {
+        File f = file('.settings/org.eclipse.core.resources.prefs')
+      	f.write('eclipse.preferences.version=1\n')
+      	f.append("encoding/<project>=$encoding")
+    }
+}
