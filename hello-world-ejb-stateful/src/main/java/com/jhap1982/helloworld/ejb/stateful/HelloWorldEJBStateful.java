@@ -13,7 +13,6 @@ public class HelloWorldEJBStateful implements HelloWorldLocal, HelloWorldRemote 
 	@Override
 	public String helloWorld(String input) {
 		return input;
-	}
-	
+	}	
 
 }
