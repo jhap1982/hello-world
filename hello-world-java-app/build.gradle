@@ -107,8 +107,8 @@ sourceSets {
         runtimeClasspath += main.output + test.output
         runtimeClasspath += configurations.jacocoAnt
         
-        java { srcDirs = ['src/it/java'] }
-        resources { srcDirs = ['src/it/resources'] }
+        java { srcDirs = ['src/it-test/java'] }
+        resources { srcDirs = ['src/it-test/resources'] }
     }
 }
 
