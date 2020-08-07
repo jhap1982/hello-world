@@ -8,3 +8,6 @@ hello-world-java-app/\.classpath
 /hello-world-groovy-app/gradle
 /hello-world-groovy-app/gradlew
 /hello-world-groovy-app/gradlew.bat
+/hello-world-kotlin-app/gradlew
+/hello-world-kotlin-app/gradlew.bat
+/hello-world-kotlin-app/gradle
