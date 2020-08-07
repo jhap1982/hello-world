@@ -2,3 +2,6 @@
 hello-world-java-app/\.project
 
 hello-world-java-app/\.classpath
+/hello-world-cpp-app/gradlew
+/hello-world-cpp-app/gradlew.bat
+/hello-world-cpp-app/gradle
