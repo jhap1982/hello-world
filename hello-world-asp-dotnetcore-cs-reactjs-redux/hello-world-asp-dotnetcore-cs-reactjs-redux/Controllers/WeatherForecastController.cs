@@ -26,6 +26,8 @@ namespace hello_world_asp_dotnetcore_cs_reactjs_redux.Controllers
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {
+            _logger.LogDebug("Get weather forecast");
+
             var rng = new Random();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
