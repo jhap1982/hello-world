@@ -1,4 +1,13 @@
-﻿function sumar(a, b) {
+﻿window.registrarDotNetHelper = function (dotNetHelper) {
+    console.log("Registrando DotNetHelper...");
+
+    // Llamar al método GetMessage de C#
+    dotNetHelper.invokeMethodAsync("CallCSharpFromJavascript", '').then(resultado => {
+       console.log("Resultado: ", resultado);
+   });
+};
+
+function sumar(a, b) {
     return a + b;
 }
 

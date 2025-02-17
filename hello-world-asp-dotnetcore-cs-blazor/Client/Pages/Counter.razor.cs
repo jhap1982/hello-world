@@ -17,11 +17,13 @@ namespace hello_world_asp_dotnetcore_cs_blazor.Client.Pages
 		[Inject]
 		public IJSRuntime JSRuntime { get; set; }
 
+		private DotNetObjectReference<Counter>? DotNetHelper;
 
 		private bool IsDisposed;
 
 		private int CurrentCount { get; set; } = 0;
 		private string BrowserName { get; set; } = string.Empty;
+		private string InfoInterop { get; set; } = string.Empty;
 
 		public Counter()
 		{
@@ -79,11 +81,18 @@ namespace hello_world_asp_dotnetcore_cs_blazor.Client.Pages
 		/// </summary>
 		/// <param name="firstRender"></param>
 		/// <returns></returns>
-		protected override Task OnAfterRenderAsync(bool firstRender)
+		protected override async Task OnAfterRenderAsync(bool firstRender)
 		{
 			Console.WriteLine($"Counter.razor -> OnAfterRenderAsync({firstRender})");
 
-			return base.OnAfterRenderAsync(firstRender);
+			if (firstRender)
+			{
+				DotNetHelper = DotNetObjectReference.Create(this);
+
+				await JSRuntime.InvokeVoidAsync("registrarDotNetHelper", DotNetHelper);
+			}
+
+			await base.OnAfterRenderAsync(firstRender);
 		}
 
 		/// <summary>
@@ -126,9 +135,24 @@ namespace hello_world_asp_dotnetcore_cs_blazor.Client.Pages
 			CurrentCount++;
 		}
 
+		/// <summary>
+		/// Interop: JS -> C#
+		/// </summary>
+		/// <returns></returns>
 		private async Task GetBrowser()
 		{
 			BrowserName = await JSRuntime.InvokeAsync<string>("getBrowserName", "N/A");
 		}
+		
+		[JSInvokable]
+		public async Task CallCSharpFromJavascript(string infoInterop = "Llamado desde C#")
+		{
+			InfoInterop = infoInterop;
+
+			StateHasChanged();
+
+			await Task.CompletedTask;
+		}
+
 	}
 }
