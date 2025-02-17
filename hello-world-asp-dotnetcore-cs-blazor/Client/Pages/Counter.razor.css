@@ -1,0 +1,54 @@
+﻿/**
+    - Mobile First: No se usa max-width, sino que se aplican mejoras progresivas a medida que el tamaño de la pantalla aumenta.
+    - Cubre los principales breakpoints: Incluye resoluciones estándar de tablets, laptops, desktops y pantallas grandes.
+    - Fácil de mantener: Se aplican estilos mínimos en pantallas pequeñas y se agregan cambios solo cuando es necesario.
+*/
+
+/* === Estilos base (para móviles) === */
+body {
+    font-size: 16px;
+    padding: 10px;
+}
+
+/* === Tablets en modo retrato (≥ 600px) === */
+@media (min-width: 600px) {
+    body {
+        font-size: 18px;
+    }
+}
+
+/* === Tablets en modo paisaje (≥ 768px) === */
+@media (min-width: 768px) {
+    body {
+        font-size: 20px;
+    }
+}
+
+/* === Laptops y pantallas medianas (≥ 1024px) === */
+@media (min-width: 1024px) {
+    body {
+        font-size: 22px;
+        padding: 20px;
+    }
+}
+
+/* === Pantallas grandes y desktops (≥ 1280px) === */
+@media (min-width: 1280px) {
+    body {
+        font-size: 24px;
+    }
+}
+
+/* === Pantallas extra grandes (≥ 1440px) === */
+@media (min-width: 1440px) {
+    body {
+        font-size: 26px;
+    }
+}
+
+/* === Televisores y ultra anchos (≥ 1920px) === */
+@media (min-width: 1920px) {
+    body {
+        font-size: 28px;
+    }
+}
