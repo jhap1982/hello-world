@@ -54,8 +54,27 @@
 *                 
 * - Dispose: Se llama cuando el componente se elimina del DOM. Es el lugar para liberar recursos, cancelar operaciones pendientes, o limpiar el estado.
 * 
-* Ciclo: [Constructor] → SetParametersAsync → OnInitialized/OnInitializedAsync → OnParametersSet/OnParametersSetAsync → ShouldRender → OnAfterRender/OnAfterRenderAsync → Dispose
+* Ciclo: 
+*	[Constructor] → 
+*	SetParametersAsync → 
+*	OnInitialized/OnInitializedAsync → 
+*	OnParametersSet/OnParametersSetAsync → 
+*	ShouldRender → 
+*	OnAfterRender/OnAfterRenderAsync → 
+*	Dispose
 * 
+* 
+* Miscelaneo:
+* En Blazor, el cascading es un mecanismo que permite pasar datos o servicios de un componente padre a sus componentes hijos sin
+* necesidad de pasar explícitamente los valores a través de parámetros ([Parameter]). Se logra usando el componente especial CascadingValue.
+* CascadingParameter en los hijos.
+* 
+* Tipo por Valor y tipo por referencia:
+* - Tipos por valor: Se almacenan en la pila (stack). Cuando se asignan o pasan como parámetro, se copia su valor.
+* - Tipos por referencia: Se almacenan en el montón (heap). Cuando se asignan o pasan como parámetro, se copia la referencia al objeto, no el objeto en sí.
+* 
+* Valor: int, double, float, decimal, bool, char, byte, sbyte, short, ushort, long, ulong, struct, enum, Tuple<>	
+* Referencia: object, string, class, array, interface, delegate, dynamic
 */
 
 var builder = WebApplication.CreateBuilder(args);
@@ -86,9 +105,23 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+/*app.UseEndpoints(endpoints =>
+{
+	endpoints.MapRazorPages();
+	endpoints.MapControllers();
+	endpoints.Map("api/{**slug}", HandleApiFallback);
+	endpoints.MapFallbackToFile("{**slug}", "index.html");
+});*/
 
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 app.Run();
+
+
+Task HandleApiFallback(HttpContext context)
+{
+	context.Response.StatusCode = StatusCodes.Status404NotFound;
+	return Task.CompletedTask;
+}
