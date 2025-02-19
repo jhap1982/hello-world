@@ -2,14 +2,37 @@
     - Mobile First: No se usa max-width, sino que se aplican mejoras progresivas a medida que el tamaño de la pantalla aumenta.
     - Cubre los principales breakpoints: Incluye resoluciones estándar de tablets, laptops, desktops y pantallas grandes.
     - Fácil de mantener: Se aplican estilos mínimos en pantallas pequeñas y se agregan cambios solo cuando es necesario.
+
+    Usa display: grid en .container para organizar los elementos en filas y columnas según el tamaño de pantalla, mientras que div usa display: flex para centrar su contenido
 */
-$base-color: red;
+$base-color: orange;
 
 /* === Estilos base (para móviles) === */
+.container {
+    display: grid;
+    /* 
+        grid-template-rows: auto auto: Define dos filas en un contenedor de Grid, donde cada fila tendrá una altura automática basada en el contenido 
+        grid-template-rows: 1fr 1fr; comportamiento más flexible: para dividir el espacio en partes iguales
+    */
+    grid-template-rows: auto auto;
+    gap: 10px;
+    padding: 10px;
+}
+
 div {
     color: $base-color;
     font-size: 16px;
     padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* === Tablets en modo retrato (≥ 600px) === */
@@ -21,16 +44,37 @@ div {
 
 /* === Tablets en modo paisaje (≥ 768px) === */
 @media (min-width: 768px) {
+    .container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
     div {
         font-size: 20px;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: space-around;
     }
 }
 
 /* === Laptops y pantallas medianas (≥ 1024px) === */
 @media (min-width: 1024px) {
+    .container {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
     div {
         font-size: 22px;
         padding: 20px;
+    }
+
+    .button-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }
 
@@ -39,12 +83,26 @@ div {
     div {
         font-size: 24px;
     }
+
+    .container {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+    }
 }
 
 /* === Pantallas extra grandes (≥ 1440px) === */
 @media (min-width: 1440px) {
+    .container {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+
     div {
         font-size: 26px;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: space-between;
     }
 }
 
@@ -52,5 +110,10 @@ div {
 @media (min-width: 1920px) {
     div {
         font-size: 28px;
+    }
+
+    .container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
     }
 }
