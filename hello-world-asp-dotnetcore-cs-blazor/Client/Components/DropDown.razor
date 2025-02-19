@@ -1,0 +1,12 @@
+﻿<select>
+    @foreach (var option in Options)
+    {
+        <option value="@option.Key">
+            @(option.Value ?? string.Empty)
+        </option>
+    }
+</select>
+
+@code {
+    public IDictionary<string, string> Options { get; set; } = new Dictionary<string, string>();
+}
