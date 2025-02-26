@@ -120,4 +120,7 @@
   <data name="str_msg_hello" xml:space="preserve">
     <value>Hola</value>
   </data>
+  <data name="str_test" xml:space="preserve">
+    <value>test</value>
+  </data>
 </root>

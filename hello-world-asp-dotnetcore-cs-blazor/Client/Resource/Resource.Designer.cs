@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace hello-world-asp-dotnetcore-cs-blazor.Client.Resource {
+namespace hello_world_asp_dotnetcore_cs_blazor.Client.Resource {
     using System;
     
     
