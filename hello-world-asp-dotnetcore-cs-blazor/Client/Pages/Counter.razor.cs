@@ -1,5 +1,6 @@
 ﻿using hello_world_asp_dotnetcore_cs_blazor.Client.Common;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Localization;
 using Microsoft.JSInterop;
 
 namespace hello_world_asp_dotnetcore_cs_blazor.Client.Pages
@@ -20,6 +21,9 @@ namespace hello_world_asp_dotnetcore_cs_blazor.Client.Pages
 
 		[Inject]
 		protected StateContainer StateContainer { get; set; }
+
+		//[Inject]
+		//public IStringLocalizer<hello_world_asp_dotnetcore_cs_blazor.Client.Resource> Localizer { get; set; }
 
 		private DotNetObjectReference<Counter>? DotNetHelper;
 

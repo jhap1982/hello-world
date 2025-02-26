@@ -2,15 +2,15 @@
 
 public class StateContainer
 {
-	private string visionLineaVistaActual = string.Empty;
+	private string _someGlobalValue = string.Empty;
 
 	
-	public string VisionLineaVistaActual
+	public string SomeGlobalValue
 	{
-		get => visionLineaVistaActual;
+		get => _someGlobalValue;
 		set
 		{
-			visionLineaVistaActual = value;
+			_someGlobalValue = value;
 			NotifyStateChanged();
 		}
 	}
