@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using hello_world_asp_dotnetcore_cs_blazor.Client.Common;
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 namespace hello_world_asp_dotnetcore_cs_blazor.Client.Pages
@@ -16,6 +17,9 @@ namespace hello_world_asp_dotnetcore_cs_blazor.Client.Pages
 	{
 		[Inject]
 		public IJSRuntime JSRuntime { get; set; }
+
+		[Inject]
+		protected StateContainer StateContainer { get; set; }
 
 		private DotNetObjectReference<Counter>? DotNetHelper;
 
@@ -71,6 +75,8 @@ namespace hello_world_asp_dotnetcore_cs_blazor.Client.Pages
 			Console.WriteLine("Counter.razor -> OnInitializedAsync()");
 
 			_module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/mymodule.js");
+
+			StateContainer.OnChange += StateHasChanged;
 
 			await base.OnInitializedAsync();
 		}
@@ -140,6 +146,9 @@ namespace hello_world_asp_dotnetcore_cs_blazor.Client.Pages
 			{
 				// Release resources
 				_module?.DisposeAsync();
+
+				// Unsuscribe action
+				StateContainer.OnChange -= StateHasChanged;
 			}
 
 			IsDisposed = true;

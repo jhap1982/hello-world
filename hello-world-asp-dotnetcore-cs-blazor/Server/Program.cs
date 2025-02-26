@@ -1,4 +1,9 @@
-﻿/**
+﻿
+
+using hello_world_asp_dotnetcore_cs_blazor.Client.Common;
+
+
+/**
  * Tipos de Blazor / Arquitectura:
  * 1. Blazor Server: La lógica de la aplicación se ejecuta en el servidor. Los cambios en la interfaz de usuario se comunican a través de una conexión SignalR.
 *  2. Blazor WebAssembly: La lógica de la aplicación se ejecuta en el navegador del cliente mediante WebAssembly. No se necesita conexión constante con el servidor.
@@ -261,6 +266,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+builder.Services.AddSingleton<StateContainer>();
 
 var app = builder.Build();
 
