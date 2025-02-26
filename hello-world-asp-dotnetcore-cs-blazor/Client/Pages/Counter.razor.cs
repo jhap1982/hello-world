@@ -25,6 +25,18 @@ namespace hello_world_asp_dotnetcore_cs_blazor.Client.Pages
 		private string BrowserName { get; set; } = string.Empty;
 		private string InfoInterop { get; set; } = string.Empty;
 
+		/// <summary>
+		/// Mecanismo en Blazor para manejar eventos y permitir la comunicación entre componentes. 
+		/// Proporciona una forma eficiente de invocar métodos cuando ocurren eventos específicos
+		/// </summary>
+		[Parameter] 
+		public EventCallback OnButtonClick { get; set; }
+
+		/// <summary>
+		/// Para cargar y ejecutar JavaScript como un módulo en Blazor (mymodule.js).
+		/// </summary>
+		private IJSObjectReference _module;
+
 		public Counter()
 		{
 			IsDisposed = false;
@@ -54,11 +66,13 @@ namespace hello_world_asp_dotnetcore_cs_blazor.Client.Pages
 		/// OnInitializedAsync es la versión asincrónica y permite ejecutar código asíncrono durante la inicialización
 		/// </summary>
 		/// <returns></returns>
-		protected override Task OnInitializedAsync()
+		protected override async Task OnInitializedAsync()
 		{
 			Console.WriteLine("Counter.razor -> OnInitializedAsync()");
 
-			return base.OnInitializedAsync();
+			_module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/mymodule.js");
+
+			await base.OnInitializedAsync();
 		}
 
 		/// <summary>
@@ -125,6 +139,7 @@ namespace hello_world_asp_dotnetcore_cs_blazor.Client.Pages
 			if (disposing)
 			{
 				// Release resources
+				_module?.DisposeAsync();
 			}
 
 			IsDisposed = true;
@@ -133,6 +148,20 @@ namespace hello_world_asp_dotnetcore_cs_blazor.Client.Pages
 		private void IncrementCount()
 		{
 			CurrentCount++;
+		}
+
+		/// <summary>
+		/// Invocar Funciones del Módulo Javascript
+		/// </summary>
+		protected async Task ShowAlert()
+		{
+			await _module.InvokeVoidAsync("showAlert", "Hello from Blazor!");
+		}
+
+		protected async Task Calculate()
+		{
+			var result = await _module.InvokeAsync<int>("addNumbers", 5, 3);
+			Console.WriteLine($"Result of addition: {result}");
 		}
 
 		/// <summary>
